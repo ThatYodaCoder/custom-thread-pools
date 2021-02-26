@@ -1,6 +1,5 @@
 package com.executor;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +10,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
@@ -34,14 +34,14 @@ public class StripedThreadPoolExecutor implements ExecutorService {
    * @param threadFactory
    * @param eHnd
    */
-  public StripedThreadPoolExecutor(int noOfThreadPools, int corePoolSize, int maximumPoolSize, int queueBound,
-      long keepAliveTime, TimeUnit unit, ThreadFactory threadFactory, UncaughtExceptionHandler eHnd) {
+  public StripedThreadPoolExecutor(int noOfThreadPools, int corePoolSize, int maximumPoolSize, long keepAliveTime,
+      TimeUnit unit, ThreadFactory threadFactory) {
     execs = new ExecutorService[noOfThreadPools];
 
     for (int i = 0; i < noOfThreadPools; i++) {
 
-      execs[i] = new BoundedThreadPoolExecutor(corePoolSize, corePoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
-          new LinkedBlockingQueue<Runnable>(), queueBound, threadFactory);
+      execs[i] = new ThreadPoolExecutor(corePoolSize, corePoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
+          new LinkedBlockingQueue<Runnable>(), threadFactory);
     }
   }
 
@@ -142,15 +142,15 @@ public class StripedThreadPoolExecutor implements ExecutorService {
   /**
    * {@inheritDoc}
    */
-  
-  public <T> Future<T> submit(Callable<T> task,int threadPoolId) {
+
+  public <T> Future<T> submit(Callable<T> task, int threadPoolId) {
     return execs[threadId(threadPoolId)].submit(task);
   }
 
   /**
    * {@inheritDoc}
    */
-  
+
   @Override
   public <T> Future<T> submit(Callable<T> task) {
     throw new UnsupportedOperationException();
@@ -159,7 +159,7 @@ public class StripedThreadPoolExecutor implements ExecutorService {
   /**
    * {@inheritDoc}
    */
-  
+
   @Override
   public <T> Future<T> submit(Runnable task, T res) {
     throw new UnsupportedOperationException();
@@ -168,7 +168,7 @@ public class StripedThreadPoolExecutor implements ExecutorService {
   /**
    * {@inheritDoc}
    */
-  
+
   @Override
   public Future<?> submit(Runnable task) {
     throw new UnsupportedOperationException();
@@ -177,7 +177,7 @@ public class StripedThreadPoolExecutor implements ExecutorService {
   /**
    * {@inheritDoc}
    */
-  
+
   @Override
   public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
     throw new UnsupportedOperationException();
@@ -186,7 +186,7 @@ public class StripedThreadPoolExecutor implements ExecutorService {
   /**
    * {@inheritDoc}
    */
-  
+
   @Override
   public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) {
     throw new UnsupportedOperationException();
@@ -195,7 +195,7 @@ public class StripedThreadPoolExecutor implements ExecutorService {
   /**
    * {@inheritDoc}
    */
-  
+
   @Override
   public <T> T invokeAny(Collection<? extends Callable<T>> tasks) {
     throw new UnsupportedOperationException();
